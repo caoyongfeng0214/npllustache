@@ -33,14 +33,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="context.lua" />
-    <None Include="lustache.lua" />
-    <None Include="package.json" />
-    <None Include="renderer.lua" />
-    <None Include="scanner.lua" />
+    <None Include="npl_mod\lustache\config.lua" />
+    <None Include="npl_mod\lustache\context.lua" />
+    <None Include="npl_mod\lustache\lustache.lua" />
+    <None Include="npl_mod\lustache\package.json" />
+    <None Include="npl_mod\lustache\renderer.lua" />
+    <None Include="npl_mod\lustache\scanner.lua" />
+    <None Include="npl_mod\lustache\templatehelper.lua" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="npl_mod\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

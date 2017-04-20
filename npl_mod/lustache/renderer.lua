@@ -1,5 +1,6 @@
 local Scanner  = require "./scanner"
 local Context  = require "./context"
+local templateHelper = require('./templatehelper');
 
 local error, ipairs, loadstring, pairs, setmetatable, tostring, type = 
       error, ipairs, loadstring, pairs, setmetatable, tostring, type 
@@ -12,7 +13,7 @@ local patterns = {
   nonSpace = "%S",
   eq = "%s*=",
   curly = "%s*}",
-  tag = "[#\\^/>{&=!]"
+  tag = "[#\\^/><?+{&=!]"
 }
 
 local html_escape_characters = {
@@ -87,13 +88,23 @@ local function nest_tokens(tokens)
   local collector = tree 
   local sections = {}
   local token, section
+  local father = nil;
+  local places = nil;
+  local placeins = nil;
 
   for i,token in ipairs(tokens) do
-    if token.type == "#" or token.type == "^" then
+	token.__idx = i;
+    if token.type == "#" or token.type == "^" or token.type == "+" then
       token.tokens = {}
       sections[#sections+1] = token
       collector[#collector+1] = token
       collector = token.tokens
+	  if(token.type == '+') then
+		if(not placeins) then
+			placeins = {};
+		end
+		placeins[token.value] = token;
+	  end
     elseif token.type == "/" then
       if #sections == 0 then
         error("Unopened section: "..token.value)
@@ -114,7 +125,15 @@ local function nest_tokens(tokens)
         collector = tree
       end
     else
-      collector[#collector+1] = token
+      collector[#collector+1] = token;
+	  if(token.type == '<') then
+		father = token;
+	  elseif(token.type == '?') then
+		if(not places) then
+			places = {};
+		end
+		places[token.value] = token;
+	  end
     end
   end
 
@@ -124,7 +143,7 @@ local function nest_tokens(tokens)
     error("Unclosed section: "..section.value)
   end
 
-  return tree
+  return tree, {father = father, places = places, placeins = placeins};
 end
 
 -- Combines the values of consecutive text tokens in the given `tokens` array
@@ -201,6 +220,17 @@ function renderer:render(template, view, partials)
   end
 
   return fn(view)
+end
+
+function renderer:renderFile(path, view, partials)
+	if(not path) then
+		error('renderFill(...), the first param is required');
+	end
+	local template = templateHelper.get(path);
+	if(not template) then
+		error('not found the template file: '.. path);
+	end
+	return self:render(template, view, partials);
 end
 
 function renderer:_section(token, context, callback, originalTemplate)
@@ -373,7 +403,37 @@ function renderer:parse(template, tags)
     end
   end
 
-  return nest_tokens(squash_tokens(tokens))
+  local ntokens, ps = nest_tokens(squash_tokens(tokens));
+
+  if(ps.father) then
+	local str = templateHelper.get(ps.father.value);
+	local fntokens, fps = self:parse(str);
+	if(fps.places and ps.placeins) then
+		local replaces = {};
+		for k, place in pairs(fps.places) do
+			replaces[place.__idx] = ps.placeins[k].tokens;
+		end
+		local newtokens = {};
+		local i = 1;
+		for i = 1, #fntokens do
+			local replacetokens = replaces[i];
+			if(replacetokens) then
+				local j = 1;
+				for j = 1, #replacetokens do
+					--newtokens:insert(replacetokens[j]);
+					table.insert(newtokens, replacetokens[j]);
+				end
+			else
+				--newtokens:insert(fntokens[i]);
+				table.insert(newtokens, fntokens[i]);
+			end
+		end
+		fntokens = newtokens;
+	end
+	ntokens = fntokens;
+  end
+
+  return ntokens, ps;
 end
 
 function renderer:new()

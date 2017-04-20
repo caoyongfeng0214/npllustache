@@ -2,6 +2,7 @@
 -- Copyright 2013 Olivine Labs, LLC <projects@olivinelabs.com>
 -- MIT Licensed.
 
+local config = require('./config');
 local string_gmatch = string.gmatch
 
 function string.split(str, sep)
@@ -13,8 +14,23 @@ end
 local lustache = {
   name     = "lustache",
   version  = "1.3.1-0",
-  extension = '.mustache',
-  renderer = require("./renderer"):new(),
+  -- extension = '.mustache',
+  config = function(cnf)
+	if(cnf) then
+		for k, v in pairs(cnf) do
+			if(k == 'root') then
+				local lstChar = string.sub(v, -1);
+				if(lstChar ~= '/' and lstChar ~= '\\') then
+					v = v .. '/';
+				end
+			end
+			config[k] = v;
+		end
+	else
+		return config;
+	end
+  end,
+  renderer = require("./renderer"):new()
 }
 
 return setmetatable(lustache, {
