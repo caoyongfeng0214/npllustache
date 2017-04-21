@@ -7,7 +7,7 @@ local templateHelper = {
 
 templateHelper.get = function(path)
 	if(config.root) then
-		path = config.root .. path;
+		path = config.views .. path;
 	end
 
 	if(config.extension) then

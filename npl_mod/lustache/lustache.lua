@@ -18,7 +18,7 @@ local lustache = {
   config = function(cnf)
 	if(cnf) then
 		for k, v in pairs(cnf) do
-			if(k == 'root') then
+			if(k == 'views') then
 				local lstChar = string.sub(v, -1);
 				if(lstChar ~= '/' and lstChar ~= '\\') then
 					v = v .. '/';
