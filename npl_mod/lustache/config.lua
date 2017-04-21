@@ -1,6 +1,6 @@
 ﻿local config = {
 	extension = '.htm',
-	root = nil
+	views = 'views'
 };
 
 
