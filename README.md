@@ -91,5 +91,5 @@ _views/index.htm_
 
     local html = engine:renderFile('index', {...});
 
-以上代码会去项目存放模板文件的目录（默认为项目根目录下的“views”文件夹）去查找 `index.htm` 模板文件（默认模板文件的扩展名为 .htm），并将其渲染，然后将渲染后的 HTML 文本返回。
+以上代码会去项目存放模板文件的目录（默认为项目根目录下的“views”文件夹）中查找 `index.htm` 模板文件（默认模板文件的扩展名为 .htm），并将其渲染，然后将渲染后的 HTML 文本返回。
 
