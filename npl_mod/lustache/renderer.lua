@@ -411,7 +411,10 @@ function renderer:parse(template, tags)
 	if(fps.places and ps.placeins) then
 		local replaces = {};
 		for k, place in pairs(fps.places) do
-			replaces[place.__idx] = ps.placeins[k].tokens;
+			local _placein = ps.placeins[k];
+			if(_placein) then
+				replaces[place.__idx] = _placein.tokens;
+			end
 		end
 		local newtokens = {};
 		local i = 1;
