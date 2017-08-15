@@ -409,26 +409,20 @@ function renderer:parse(template, tags)
 	local str = templateHelper.get(ps.father.value);
 	local fntokens, fps = self:parse(str);
 	if(fps.places and ps.placeins) then
-		local replaces = {};
-		for k, place in pairs(fps.places) do
-			local _placein = ps.placeins[k];
-			if(_placein) then
-				replaces[place.__idx] = _placein.tokens;
-			end
-		end
 		local newtokens = {};
 		local i = 1;
 		for i = 1, #fntokens do
-			local replacetokens = replaces[i];
-			if(replacetokens) then
-				local j = 1;
-				for j = 1, #replacetokens do
-					--newtokens:insert(replacetokens[j]);
-					table.insert(newtokens, replacetokens[j]);
+			local fntoken = fntokens[i];
+			if(fntoken.type == '?') then
+				local placein = ps.placeins[fntoken.value];
+				if(placein) then
+					local j = 1;
+					for j = 1, #(placein.tokens) do
+						table.insert(newtokens, placein.tokens[j]);
+					end
 				end
 			else
-				--newtokens:insert(fntokens[i]);
-				table.insert(newtokens, fntokens[i]);
+				table.insert(newtokens, fntoken);
 			end
 		end
 		fntokens = newtokens;
